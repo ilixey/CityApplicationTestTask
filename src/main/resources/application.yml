@@ -1,0 +1,25 @@
+spring:
+    main:
+        allow-circular-references: true
+    output:
+        ansi:
+            enabled: ALWAYS
+    datasource:
+        driver-class-name: org.postgresql.Driver
+        url: jdbc:postgresql://localhost:5432/app_database
+        username: ${LOGIN:custom_user}
+        password: ${PASSWORD:user}
+    jpa:
+        database: POSTGRESQL
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
+        show-sql: true
+    hibernate:
+        ddl-auto: validate
+    flyway:
+        locations:
+            - classpath:db/migration
+            - classpath:db/testdata
+        baseline-on-migrate: true
+
+jwt:
+    secret: secret
