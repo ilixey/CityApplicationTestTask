@@ -8,11 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 import vaspiakou.citylistapplication.dto.response.GeneralErrorResponse;
-import vaspiakou.citylistapplication.dto.response.ResponseMessageConstants;
-import vaspiakou.citylistapplication.exception.FileErrorException;
-import vaspiakou.citylistapplication.exception.notfound.CityNotFoundException;
-import vaspiakou.citylistapplication.exception.notfound.RoleNotFoundException;
-import vaspiakou.citylistapplication.exception.notfound.UserNotFoundException;
+import vaspiakou.citylistapplication.exception.notfound.NotFoundException;
 import vaspiakou.citylistapplication.exception.unauthorized.ExpiredAccessTokenException;
 import vaspiakou.citylistapplication.exception.unauthorized.InvalidAccessTokenException;
 import vaspiakou.citylistapplication.util.ResponseUtil;
@@ -23,11 +19,7 @@ import vaspiakou.citylistapplication.util.ResponseUtil;
 public class GlobalExceptionHandler {
     private final ResponseUtil responseUtil;
 
-    @ExceptionHandler({
-            CityNotFoundException.class,
-            UserNotFoundException.class,
-            RoleNotFoundException.class
-    })
+    @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<GeneralErrorResponse> handleAllNotFoundException(ResponseStatusException ex) {
         GeneralErrorResponse response = responseUtil.createGeneralErrorResponse(ex.getReason());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
@@ -46,11 +38,5 @@ public class GlobalExceptionHandler {
     public ResponseEntity<GeneralErrorResponse> handleAllException(Exception ex){
         GeneralErrorResponse response = responseUtil.createGeneralErrorResponse(ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(FileErrorException.class)
-    public ResponseEntity<GeneralErrorResponse> handleFileErrorException(Exception ex){
-        GeneralErrorResponse response = responseUtil.createGeneralErrorResponse(ResponseMessageConstants.FILE_ERROR);
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }

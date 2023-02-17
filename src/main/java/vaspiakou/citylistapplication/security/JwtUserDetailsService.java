@@ -5,8 +5,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
-import vaspiakou.citylistapplication.exception.notfound.RoleNotFoundException;
-import vaspiakou.citylistapplication.exception.notfound.UserNotFoundException;
+import vaspiakou.citylistapplication.exception.notfound.NotFoundException;
 import vaspiakou.citylistapplication.model.User;
 import vaspiakou.citylistapplication.repository.RoleRepository;
 import vaspiakou.citylistapplication.repository.UserRepository;
@@ -22,10 +21,10 @@ public class JwtUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> {
-            throw new UserNotFoundException(username);
+            throw new NotFoundException(String.format("User with username %s is not found", username));
         });
         String[] authorities = roleRepository.findById(user.getRole_id()).orElseThrow(() -> {
-            throw new RoleNotFoundException();
+            throw new NotFoundException("Role is not found");
         }).getAuthorityList();
 
         List<SimpleGrantedAuthority> simpleGrantedAuthorities = new ArrayList<>();

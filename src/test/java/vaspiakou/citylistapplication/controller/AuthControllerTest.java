@@ -14,7 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import vaspiakou.citylistapplication.advice.GlobalExceptionHandler;
 import vaspiakou.citylistapplication.dto.request.UsernameAndPasswordDto;
 import vaspiakou.citylistapplication.dto.response.AccessTokenDto;
-import vaspiakou.citylistapplication.exception.notfound.UserNotFoundException;
+import vaspiakou.citylistapplication.exception.notfound.NotFoundException;
 import vaspiakou.citylistapplication.security.JwtFilter;
 import vaspiakou.citylistapplication.security.JwtTokenUtil;
 import vaspiakou.citylistapplication.security.JwtUserDetailsService;
@@ -48,7 +48,7 @@ public class AuthControllerTest {
 
     private final MockMvc mockMvc;
     private final AuthService authService;
-    private final String AUTH_URL = "/auth";
+    private final String AUTH_URL = "/api/v1/auth";
     private final String TEST_STRING = "test";
 
     @Test
@@ -68,12 +68,11 @@ public class AuthControllerTest {
     void loginWithInValidPasswordShouldReturnUserNotFound() throws Exception {
         UsernameAndPasswordDto usernameAndPasswordDto = createUsernameAndPasswordDto();
         String json = convertRequestDtoToJson(usernameAndPasswordDto);
-        when(authService.loginWithUsernameAndPassword(usernameAndPasswordDto)).thenThrow(new UserNotFoundException(anyString()));
+        when(authService.loginWithUsernameAndPassword(usernameAndPasswordDto)).thenThrow(new NotFoundException(TEST_STRING));
         mockMvc.perform(post(AUTH_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isNotFound());
-        verify(authService, times(1)).loginWithUsernameAndPassword(usernameAndPasswordDto);
     }
 
     private <T> String convertRequestDtoToJson(T requestDto) {

@@ -43,9 +43,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf().disable()
-                .authorizeRequests().antMatchers("/auth").permitAll()
-                .antMatchers("/city").hasRole("ALLOWED_VIEW")
-                .antMatchers("/city/editing", "/city/load").hasRole("ALLOWED_EDIT")
+                .authorizeRequests().antMatchers("/api/v1/auth").permitAll()
+                .antMatchers("/api/v1/city").hasRole("ALLOWED_VIEW")
+                .antMatchers("/api/v1/city/editing", "/api/v1/city/load").hasRole("ALLOWED_EDIT")
                 .anyRequest().authenticated()
                 .and().sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);

@@ -10,11 +10,8 @@ import org.springframework.boot.test.mock.mockito.MockBeans;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import vaspiakou.citylistapplication.dto.response.GeneralErrorResponse;
-import vaspiakou.citylistapplication.dto.response.ResponseMessageConstants;
-import vaspiakou.citylistapplication.exception.FileErrorException;
-import vaspiakou.citylistapplication.exception.notfound.CityNotFoundException;
-import vaspiakou.citylistapplication.exception.notfound.RoleNotFoundException;
-import vaspiakou.citylistapplication.exception.notfound.UserNotFoundException;
+import vaspiakou.citylistapplication.exception.notfound.NotFoundException;
+import vaspiakou.citylistapplication.util.ResponseMessageConstants;
 import vaspiakou.citylistapplication.exception.unauthorized.ExpiredAccessTokenException;
 import vaspiakou.citylistapplication.exception.unauthorized.InvalidAccessTokenException;
 import vaspiakou.citylistapplication.util.ResponseUtil;
@@ -41,31 +38,11 @@ public class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void handleCityNotFoundException(){
-        response.setMessage(ResponseMessageConstants.CITY_NOT_FOUND);
+    void handleNotFoundException(){
+        response.setMessage(ResponseMessageConstants.NOT_FOUND);
         when(responseUtil.createGeneralErrorResponse(anyString())).thenReturn(response);
         ResponseEntity<GeneralErrorResponse> responseEntity = globalExceptionHandler
-                .handleAllNotFoundException(new CityNotFoundException(anyString()));
-        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
-        assertEquals(response.getMessage(), Objects.requireNonNull(responseEntity.getBody()).getMessage());
-    }
-
-    @Test
-    void handleRoleNotFoundException(){
-        response.setMessage(ResponseMessageConstants.ROLE_NOT_FOUND);
-        when(responseUtil.createGeneralErrorResponse(anyString())).thenReturn(response);
-        ResponseEntity<GeneralErrorResponse> responseEntity = globalExceptionHandler
-                .handleAllNotFoundException(new RoleNotFoundException());
-        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
-        assertEquals(response.getMessage(), Objects.requireNonNull(responseEntity.getBody()).getMessage());
-    }
-
-    @Test
-    void handleUserNotFoundException(){
-        response.setMessage(ResponseMessageConstants.USERNAME_NOT_FOUND);
-        when(responseUtil.createGeneralErrorResponse(anyString())).thenReturn(response);
-        ResponseEntity<GeneralErrorResponse> responseEntity = globalExceptionHandler
-                .handleAllNotFoundException(new UserNotFoundException(anyString()));
+                .handleAllNotFoundException(new NotFoundException(anyString()));
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
         assertEquals(response.getMessage(), Objects.requireNonNull(responseEntity.getBody()).getMessage());
     }
@@ -99,15 +76,6 @@ public class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
     }
 
-    @Test
-    void handleFileErrorException(){
-        response.setMessage(ResponseMessageConstants.FILE_ERROR);
-        when(responseUtil.createGeneralErrorResponse(anyString())).thenReturn(response);
-        ResponseEntity<GeneralErrorResponse> responseEntity = globalExceptionHandler
-                .handleFileErrorException(new FileErrorException(anyString()));
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertEquals(response.getMessage(), Objects.requireNonNull(responseEntity.getBody()).getMessage());
-    }
     private static GeneralErrorResponse createGeneralErrorResponse(String message) {
         return GeneralErrorResponse.builder()
                 .dateTime(Instant.now())

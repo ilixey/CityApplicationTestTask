@@ -2,46 +2,37 @@ package vaspiakou.citylistapplication.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import vaspiakou.citylistapplication.dto.request.CityDto;
 import vaspiakou.citylistapplication.dto.response.SuccessResponse;
 import vaspiakou.citylistapplication.model.City;
 import vaspiakou.citylistapplication.service.CityService;
-import java.io.IOException;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/city")
+@RequestMapping("/api/v1/")
 @Slf4j
-public class CitiesController {
+public class CityController {
 
     private final CityService cityService;
 
-    @GetMapping("/{name}")
+    @GetMapping("/city/{name}")
     public City getCityByName(@PathVariable(value = "name") String cityName) {
         log.info("REQUEST GET /city/" + cityName);
-        return cityService.findCityByName(cityName);
+        return cityService.getCityByName(cityName);
     }
 
-    @GetMapping("/list/{page}")
-    public List<City> getPageOfCities(@PathVariable(value = "page") int page) {
+    @GetMapping("/getCities/{page}")
+    public Page<City> getPageOfCities(@PathVariable(value = "page") int page) {
         log.info("REQUEST GET /city/list/" + page);
         return cityService.getPageOfCities(page);
     }
 
-    @PatchMapping("/editing")
+    @PatchMapping("/city/editing")
     public SuccessResponse editCity(@RequestBody CityDto cityDto) {
         log.info("REQUEST PATCH /city/editing");
-        City city = cityService.editCity(cityDto);
-        return new SuccessResponse(String.format("The info about %s is edited successfully.", city.getName()));
-    }
-
-    @PostMapping("/load")
-    public SuccessResponse uploadCsvFile(@RequestParam("file") MultipartFile file) throws IOException {
-        log.info("REQUEST POST /city/load");
-        cityService.resolveFile(file);
-        return new SuccessResponse("File was saved successfully");
+        City city = cityService.editCityById(cityDto);
+        return new SuccessResponse(String.format("The info about city with id=%d is edited successfully.", city.getId()));
     }
 }

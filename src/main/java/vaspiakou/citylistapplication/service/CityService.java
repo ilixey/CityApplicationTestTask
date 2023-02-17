@@ -2,67 +2,42 @@ package vaspiakou.citylistapplication.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import vaspiakou.citylistapplication.dto.request.CityDto;
-import vaspiakou.citylistapplication.exception.FileErrorException;
+import vaspiakou.citylistapplication.exception.notfound.NotFoundException;
 import vaspiakou.citylistapplication.model.City;
-import vaspiakou.citylistapplication.util.CityUtil;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
+import vaspiakou.citylistapplication.repository.CityRepository;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class CityService {
 
-    private final CityUtil cityUtil;
-
-    public City findCityByName(String name){
-        return cityUtil.findCityByName(name);
+    private final CityRepository cityRepository;
+    public City getCityByName(String name){
+        return cityRepository.findByName(name).orElseThrow(() -> {
+            throw new NotFoundException(String.format("The city with name %s is not found", name));
+        });
     }
 
-    public List<City> getPageOfCities(int page){
-        return cityUtil.getCities(page);
+    public Page<City> getPageOfCities(int page){
+        Pageable pageable = PageRequest.of(page, 10, Sort.by("id"));
+        Page<City> cityPage = cityRepository.findAll(pageable);
+        return cityPage;
     }
 
-    public City editCity(CityDto cityDto) {
-        City city = cityUtil.findCityById(cityDto.getId());
-        cityUtil.editCity(city, cityDto);
+    public City editCityById(CityDto cityDto) {
+        Long id = cityDto.getId();
+        City city = cityRepository.findById(id).orElseThrow(() -> {
+            throw new NotFoundException(String.format("The city with id %d not found", id));
+        });
+        city.setName(cityDto.getName());
+        city.setPhoto(cityDto.getPhoto());
+        cityRepository.save(city);
         return city;
-    }
-
-    public void resolveFile(MultipartFile file) throws IOException {
-        if (!cityUtil.hasCSVFormat(file)) throw new FileErrorException("Failed to parse csv file");
-        List<City> cities = csvToCities(file.getInputStream());
-        cityUtil.saveCities(cities);
-    }
-
-    private List<City> csvToCities(InputStream is) {
-        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-             CSVParser csvParser = new CSVParser(fileReader,
-                     CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim())) {
-            List<City> cities = new ArrayList<>();
-            Iterable<CSVRecord> csvRecords = csvParser.getRecords();
-            for (CSVRecord csvRecord : csvRecords) {
-                City city = City.builder()
-                                .id(Long.parseLong(csvRecord.get("id")))
-                                .name(csvRecord.get("name"))
-                                .photo(csvRecord.get("photo"))
-                                .build();
-                cities.add(city);
-            }
-            return cities;
-        } catch (IOException e) {
-            throw new FileErrorException("Failed to parse CSV file");
-        }
     }
 }
